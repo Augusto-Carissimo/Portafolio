@@ -1,0 +1,26 @@
+body {
+	display: flex;
+	min-height: 10vh;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 15px
+}
+
+.col-sm-3 {
+	text-align: center;
+	image-rendering: auto;
+	padding: 15px;
+
+}
+  
+.cover_book {
+	width:200x;
+   	height:300px;
+	text-align: center;
+	padding: 15px;
+}
+
+.sort_by {
+    align-self: end;
+}
