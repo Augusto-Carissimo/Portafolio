@@ -1,7 +1,3 @@
-Thanks for your interest in this position with Gordian Software's API Integration team.
-
-The next step in the interview process is to complete the exercise below. This is a practical challenge similar to real problems you would solve as part of this team.
-
 Seatmap Availability Exercise:
 
 Our goal is to parse seatmap information from XML files and create a JSON format that our customers can parse so that they can display any airline seatmap by integrating our format.
