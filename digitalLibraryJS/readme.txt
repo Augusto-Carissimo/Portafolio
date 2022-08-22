@@ -1,14 +1,17 @@
-Hola Ailen!
+Hola Yael.
 
-Sobre las sugerencias:
-- En el input de año solo se puede colocar hasta el número 4: pense que el attr 'max' en inputs referia
-a la maxima cantidad de caracteres. Creo que no existe este attr no?
-- Session Storage: en index.js modifique el guardado de los libros en Session Storage para que solo queden
-los libros agregados.
-En el Carrito los libros agregados se mantiene durante la sesion borrandose cuando se compran.
+Aqui la entrega del proyecto final: Biblioteca digital
 
-Sobre la incorporacion de libreias: Sweet Alert
-- En index.js en las lineas: 107 y 119
-- En recomedaciones.js en las lineas: 100 y 199
+Funcionalidades:
+- index: fetch libros de un json
+         agregar libros con inputs
+         acceder a informacion de cada libro en su propio html
 
-Buena semana!
+- libro: accede a info del libro a traves de id dado en url (window.location.search)
+         quitar libro de la Biblioteca
+
+- recomendaciones: fetch libros de un json
+                   agregar y quitar libros al Carrito (actualizacion de precio)
+                   comprar (elimina data de Session Storage)
+
+Muchas gracias!

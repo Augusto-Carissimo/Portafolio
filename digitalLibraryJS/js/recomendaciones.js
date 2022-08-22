@@ -1,200 +1,262 @@
-//fetch lee archivo json
-//crea objetos con constructor Book
-//agrega cada libro al html con createGallery
-//ready crea eventos para los botones
-fetch("./recommendations.json")
-    .then(
-        results => results.json()
-    )
-    .then(
-        data => {
-            data.toRead.forEach(dbbook => {
-                createGallery(dbbook)
-            })
-            if ('recomm' in sessionStorage) {
-                let cart_items_list = document.querySelector('.cart-items');
+/*
+ Muestra los datos de recommendations.json
+ - Agregar libro al carrito
+ - Quitar del carrito
+ - Actualizacion del total
+ - Button Comprar borra los elementos del Session Storage 
+   desplegando mensaje "Su compra esta en camino!"
+ */
 
-                while (cart_items_list.hasChildNodes()) {
-                    cart_items_list.removeChild(cart_items_list.firstChild)
-                }
-                JSON.parse(sessionStorage.getItem('recomm')).forEach(row => {
-                    createNewRowCart(row.cover, row.title, row.autor, row.price)
-                })
-            }
-            events()
-        })
-class Book {
-    constructor(title, autor, cover, year, summary, price) {
-        this.title = title;
-        this.autor = autor;
-        this.cover = cover;
-        this.year = year;
-        this.summary = summary;
-        this.price = price;
-    }
+//funcion asincronica recupera data de recommendations.json
+const fetchRecomJson = async () => 
+{  
+    let response = await fetch('./json/recommendations.json');
+    let data = await response.json();
+    return data;
 }
 
-function createGallery({ title, autor, cover, year, summary, price }) {
+//llama funcion asincronica y almacena los datos en Session Storage
+fetchRecomJson()
+    .then(data => 
+    {
+        if (!sessionStorage.getItem('recomm')) 
+        {
+            let session_list = [];
+            data.recomm.forEach(element => 
+                {
+                    session_list.push(element);
+                })
+            sessionStorage.setItem('recomm', JSON.stringify(session_list));
+            session_list = [];
+        }
+    })
 
-    let shop_items = document.querySelector('.container');
+//actualiza el total del carrito: 
+//corre cada vez que se carga el carrito (addPurchases) con Session Storage (purchases)
+const updateCartTotal = () => 
+{
+    let total = 0;
+    let cart_item = document.querySelectorAll('.cart-row-item');
+    cart_item.forEach(element => 
+    {
+        let item_price = element.querySelector('.cart-price').innerHTML.replace('$', '');
+        let item_quantity = element.querySelector('.cart-quantity-input').value;
+        total += (item_price * item_quantity);
+    })
+    total = Math.round(total * 100) / 100;
+
+    let cartTotal = document.querySelector('.cart-total-price');
+    cartTotal.innerHTML = `$ ${total}`;
+}
+
+/*
+carga en el carrito todos los libros en Session Storage (purchases)
+esta funcion es llamada cada vez que carga la pagina (displayRecommedations),
+cada vez que se agrega un libro (addCartClick),
+cada vez que se elimina un libro del carrito (removeButtonClick) y
+cuando se hace la compra (purchaseCartItems)
+*/
+const addPurchases = () => 
+{
+    let cart_items_list = document.querySelector('.cart-items');
+    while (cart_items_list.hasChildNodes()) 
+    {
+        cart_items_list.removeChild(cart_items_list.firstChild);
+    }
+    if (sessionStorage.getItem('purchases'))
+    {
+        JSON.parse(sessionStorage.getItem('purchases')).forEach(element =>
+            {
+                let new_cart_row = document.createElement('div');
+                new_cart_row.className = 'cart-row-item';
+                new_cart_row.setAttribute('data-value', `${element.id}`);
+                new_cart_row.innerHTML = `
+                                        <div class="cart-item cart-column">
+                                            <img class="cart-item-image" src="${element.cover}" width="150" height="auto">
+                                            <span class="cart-item-title">${element.title} - ${element.autor}</span>
+                                        </div>
+                                        <span class="cart-price cart-column">${element.price}</span>
+                                        <div class="cart-quantity cart-column">
+                                            <input class="cart-quantity-input" type="number" value="1">
+                                            <button class="btn btn-danger" type="button">Quitar del carrito</button>
+                                        </div>
+                                        `;
+                cart_items_list = document.querySelector('.cart-items');
+                cart_items_list.append(new_cart_row);
+
+                updateCartTotal();
+            })
+
+        let remove_buttos_event = document.querySelectorAll('.btn-danger');
+        remove_buttos_event.forEach(element =>
+            {
+                element.addEventListener('click', removeButtonClick)
+            })
+
+        let quantity_selector = document.querySelectorAll('.cart-quantity-input');
+        quantity_selector.forEach(element => 
+            {
+                element.addEventListener('change', quantityChange)
+            })
+    }
+    updateCartTotal()
+}
+
+//muestra los libros en Session Storage en html
+const displayRecommedations = () => 
+{
+    if (JSON.parse(sessionStorage.getItem('recomm')) == null) 
+    { 
+        window.setTimeout(displayRecommedations, 100);
+    }
+    else 
+    {
+        let session_storage_array = JSON.parse(sessionStorage.getItem('recomm'));
+        session_storage_array.forEach(element => 
+        {
+            displayRecommBook(element);
+        })
+    }
+    add_and_purchase_buttons_events();
+}
+
+//crea templete para cada Recomendacion
+const displayRecommBook = (recommBook) => 
+{
     let book_item = document.createElement('div');
     book_item.className = 'row-container';
-
-    let shop_item_row = `<div class='shop-item-image'>
-                            <img class="item-image" src=${cover}>
+    book_item.setAttribute('data-value', `${recommBook.id},${recommBook.cover},${recommBook.title},${recommBook.autor},${recommBook.year},${recommBook.price}`)
+    book_item.innerHTML = 
+                        `
+                        <div class='shop-item-image'>
+                            <img class="item-image" src=${recommBook.cover}>
                         </div>
 
                         <div class="shop-item-details">
 
                                 <h1 class="shop-item-title">
-                                    <span class="item-title">${title}</span>
+                                    <span class="item-title">${recommBook.title}</span>
                                     <span class="item-sep">-</span>
-                                    <span class="item-autor">${autor}</span>
-                                    <span class="item-year">(${year})</span>
+                                    <span class="item-autor">${recommBook.autor}</span>
+                                    <span class="item-year">(${recommBook.year})</span>
                                 </h1>
                             
-                                <span class="shop-item-summary">${summary}</span>
+                                <span class="shop-item-summary">${recommBook.summary}</span>
 
                                 <span class="shop-item-price">
                                     <span class="item-price">
-                                        $${price}
+                                        $${recommBook.price}
                                     </span>
                                     <button class="btn btn-primary shop-item-button" type="button">Agregar al carrito</button>
                                 </span> 
-                        </div>`
+                        </div>
+                        `
 
-    book_item.innerHTML = shop_item_row
+    let shop_items = document.querySelector('.container');
     shop_items.append(book_item)
+    addPurchases()
 }
 
-//eventos
-function events() {
+//elimina purchases de Session Storage vaciando asi el carrito
+const purchaseCartItems = () =>
+{
+    sessionStorage.removeItem('purchases');
+    swal('Su compra esta en camino!');
+    addPurchases();
+}
+
+//events buttons Agragar y Comprar
+const add_and_purchase_buttons_events = () => 
+{
     //boton Agregar al Carrito
-    let add_cart_botton = document.querySelectorAll('.shop-item-button');
-    add_cart_botton.forEach(button => {
+    let add_cart_bottons = document.querySelectorAll('.shop-item-button');
+    add_cart_bottons.forEach(button => 
+    {
         button.addEventListener('click', addCartClick);
-    })
+    });
 
     //boton Comprar
     let purschase_button = document.querySelector('.btn-purchase');
-    purschase_button.addEventListener('click', purchaseCartItems)
+    purschase_button.addEventListener('click', purchaseCartItems);
 }
 
-//con click Agregar al Carrito recupera info del elemento
-function addCartClick(e) {
-    let add_click = e.target;
-    let book_purchase = add_click.parentElement.parentElement.parentElement;
+// elimina libro de Session Storage (purchases)
+const removeButtonClick = (e) =>
+{
+    let remove_button = e.target;
+    let purchases_array = JSON.parse(sessionStorage.getItem('purchases'));
+    purchases_array = purchases_array.filter(data => data.id != remove_button.parentElement.parentElement.getAttribute('data-value'))
+    sessionStorage.setItem('purchases', JSON.stringify(purchases_array));
 
-    let cover = book_purchase.querySelector('.item-image').src;
-    let title = book_purchase.querySelector('.item-title').innerHTML;
-    let autor = book_purchase.querySelector('.item-autor').innerHTML;
-    let year = book_purchase.querySelector('.item-year').innerHTML;
-    let price = book_purchase.querySelector('.item-price').innerHTML;
+    addPurchases();
+}
 
-    let cart_book = new Book(title, autor, cover, year, '', price);
-    let recomm_list = []
-
-    if ('recomm' in sessionStorage) {
-        if (JSON.parse(sessionStorage.getItem('recomm')).some((row) => row.title == cart_book.title)) {
-            swal('Este libro ya se encuentra en tu carrito')
-        } else {
-            let cart_items_list = document.querySelector('.cart-items');
-
-            while (cart_items_list.hasChildNodes()) {
-                cart_items_list.removeChild(cart_items_list.firstChild)
-            }
-            JSON.parse(sessionStorage.getItem('recomm')).forEach(row => {
-                recomm_list.push(row)
-            })
-            recomm_list.push(cart_book)
-            sessionStorage.setItem('recomm', JSON.stringify(recomm_list))
-            console.log(recomm_list)
-            JSON.parse(sessionStorage.getItem('recomm')).forEach(row => {
-                createNewRowCart(row.cover, row.title, row.autor, row.price)
-            })
-        }
-    } else {
-        let recomm_list = []
-        recomm_list.push(cart_book)
-        sessionStorage.setItem('recomm', JSON.stringify(recomm_list))
-        console.log('first book', JSON.parse(sessionStorage.getItem('recomm')))
-        JSON.parse(sessionStorage.getItem('recomm')).forEach(row => {
-            createNewRowCart(row.cover, row.title, row.autor, row.price)
-        })
+//quantity selected: no puede ser menor de 1
+const quantityChange = (e) => 
+{
+    quantity = e.target
+    if (isNaN(quantity.value) || quantity.value <= 0) {
+        quantity.value = 1;
     }
-    recomm_list = []
-
-}
-
-function createNewRowCart(cover, title, autor, price) {
-    let new_cart_row = document.createElement('div');
-    new_cart_row.className = 'cart-row-item';
-    new_cart_row.innerHTML = `<div class="cart-item cart-column">
-                                <img class="cart-item-image" src="${cover}" width="150" height="auto">
-                                <span class="cart-item-title">${title} - ${autor}</span>
-                            </div>
-                            <span class="cart-price cart-column">${price}</span>
-                            <div class="cart-quantity cart-column">
-                                <input class="cart-quantity-input" type="number" value="1">
-                                <button class="btn btn-danger" type="button">Quitar del carrito</button>
-                            </div>`
-
-    let cart_items_list = document.querySelector('.cart-items');
-
-    cart_items_list.append(new_cart_row);
-
-    //por cada boton en el carrito
-    //remove button event
-    let remove_buttons = cart_items_list.querySelectorAll(
-        '.btn-danger')
-    remove_buttons.forEach(row => row.addEventListener('click', removeCartClick));
-
-    //qunatity input event
-    let quantity_input = cart_items_list.querySelectorAll(
-        '.cart-quantity-input')
-    quantity_input.forEach(row => row.addEventListener('change', quantityChange));
-
     updateCartTotal();
 }
 
-function removeCartClick(e) {
-    let row_cart_remove = e.target
-    row_cart_remove.parentElement.parentElement.remove()
-    updateCartTotal()
-}
+//Agrage libro clicleado al Carrito
+const addCartClick = (e) => 
+{
+    add_button = e.target;
+    let attr_list = add_button.parentElement.parentElement.parentElement.getAttribute('data-value');
+    attr_list = attr_list.split(',');
+    let [id, cover, title, autor, year, price] = attr_list;
 
-function quantityChange(e) {
-    quantity_input = e.target
-    if (isNaN(quantity_input.value) || quantity_input.value <= 0) {
-        quantity_input.value = 1
+    if (sessionStorage.getItem('purchases')) 
+    {
+        let check_duplicate_array = [];
+        let purchases_array = JSON.parse(sessionStorage.getItem('purchases'));
+        //chequea si el libro ya esta en carrito usando el id extraido del json
+        purchases_array.forEach(element =>
+            {
+                check_duplicate_array.push(element.id);
+            })
+        if (check_duplicate_array.includes(id))
+        {
+            swal('Este libro ya esta en el carrito!');
+        }
+        else
+        {
+            purchases_array.push(
+            {
+                "id": id,
+                "title": title,
+                "autor":autor,
+                "cover":cover,
+                "year":year,
+                "price":price
+            });
+            sessionStorage.setItem('purchases', JSON.stringify(purchases_array));
+            purchases_array = [];
+
+        }
+
+        addPurchases();
     }
-    updateCartTotal()
-}
-//hace cuenta del precio
-//reduce a 2 decimales
-function updateCartTotal() {
-    let total = 0
-    let cart_row = document.querySelectorAll('.cart-row-item')
-    cart_row.forEach(row => {
-        let item_price = row.querySelector('.cart-price').innerHTML.replace('$', '')
-        let item_quantity = row.querySelector('.cart-quantity-input').value
-        total += (item_price * item_quantity)
-    })
-    total = Math.round(total * 100) / 100
+    else
+    {
+        let purchases_array = [];
+        purchases_array.push(
+        {
+            "id": id,
+            "title": title,
+            "autor":autor,
+            "cover":cover,
+            "year":year,
+            "price":price
+        });
+        sessionStorage.setItem('purchases', JSON.stringify(purchases_array));
+        purchases_array = [];
 
-    let cartTotal = document.querySelector('.cart-total-price')
-    cartTotal.innerHTML = `$ ${total}`
-}
-
-//evento click en Comprar elimina todos los elementos del carrito
-function purchaseCartItems(e) {
-    let button = e.target
-    let items = button.parentElement.querySelector('.cart-items')
-
-    while (items.hasChildNodes()) {
-        items.removeChild(items.firstChild)
+        addPurchases();
     }
-    sessionStorage.removeItem('recomm')
-    swal('Su compra esta en camino!')
-    updateCartTotal()
 }
+
+displayRecommedations();

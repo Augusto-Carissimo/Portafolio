@@ -1,6 +1,7 @@
 {
-    "toRead": [
-        {
+    "recomm": [
+        {   
+            "id":"1",
             "title":"Infinite Jest",
             "autor":"David Foster Wallace",
             "cover":"./img/infinite_jest.jpg",
@@ -9,6 +10,7 @@
             "price":"9.99"
         },
         {
+            "id":"2",
             "title":"Maps of Meaning",
             "autor":"Jordan Peterson",
             "cover":"./img/maps_of_meaning.jpg",
@@ -17,6 +19,7 @@
             "price":"9.99"
         },
         {
+            "id":"3",
             "title":"Archipiélago Gulag",
             "autor":"Aleksandr Solzhenitsyn",
             "cover":"./img/archipielago_gulag.jpg",
@@ -25,6 +28,7 @@
             "price":"9.99"
         },
         {
+            "id":"4",
             "title":"Crimen y castigo",
             "autor":"Fiódor Dostoyevski",
             "cover":"./img/crimern_y_castigo.jpg",
@@ -33,6 +37,7 @@
             "price":"9.99"
         },
         {
+            "id":"5",
             "title":"Paradise Lost",
             "autor":"John Milton",
             "cover":"./img/paradise_lost.jpg",
@@ -41,6 +46,7 @@
             "price":"9.99"
         },
         {
+            "id":"6",
             "title":"Endurance: Shackleton's Incredible Voyage ",
             "autor":"Alfred Lansing",
             "cover":"./img/endurence.jpg",
@@ -49,6 +55,7 @@
             "price":"9.99"
         },
         {
+            "id":"7",
             "title":"Fausto",
             "autor":"Johann Wolfgang von Goethe",
             "cover":"./img/fausto.jpg",

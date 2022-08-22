@@ -4,14 +4,12 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	gap: 15px
 }
 
 .col-sm-3 {
 	text-align: center;
 	image-rendering: auto;
 	padding: 15px;
-
 }
   
 .cover_book {
@@ -23,4 +21,5 @@ body {
 
 .sort_by {
     align-self: end;
+	margin-top: 15px;
 }
