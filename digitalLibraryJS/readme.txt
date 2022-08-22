@@ -1,5 +1,3 @@
-Hola Yael.
-
 Aqui la entrega del proyecto final: Biblioteca digital
 
 Funcionalidades:
@@ -13,5 +11,3 @@ Funcionalidades:
 - recomendaciones: fetch libros de un json
                    agregar y quitar libros al Carrito (actualizacion de precio)
                    comprar (elimina data de Session Storage)
-
-Muchas gracias!
